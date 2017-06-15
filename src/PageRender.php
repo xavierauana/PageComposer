@@ -32,15 +32,15 @@ class PageRender
 
     }
 
-    private function getComponents($fileType = "xml", $file_directory = 'views/theme', $componentTag = "component") {
-        $file_directory = $this->is_component ? $file_directory . "/components" : $file_directory;
+    private function getComponents($fileType = "xml") {
+        $file_directory = $this->is_component ? config("PageComposer.components_directory") : config("PageComposer.theme_directory");
         if ($configFilePath = $this->getConfigFilePath($fileType, $file_directory)) {
             $this->getComponentsNode($configFilePath);
             $this->getVariables($configFilePath);
         }
     }
 
-    public function renderHtml($components_location = "theme.components") {
+    public function renderHtml() {
         $html = "";
         if (count($this->components) > 0) {
             foreach ($this->components as $component) {
@@ -48,10 +48,12 @@ class PageRender
                 $html = $html . $component->renderHtml();
             }
         } else {
+            $components_location = $components_location?? str_replace("/", ".", str_replace("views/", "",
+                    $this->is_component ? config("PageComposer.components_directory") : config("PageComposer.theme_directory")));
+
             $view = $this->createView($components_location . "." . $this->page);
             $html = $view->render();
         }
-
 
         return $html;
     }
