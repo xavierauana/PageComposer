@@ -1,0 +1,19 @@
+{
+  "name": "anacreation/page-composer",
+  "description": "Page Composer",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+	{
+	  "name": "Xavier Au",
+	  "email": "xavier.au@anacreation.com"
+	}
+  ],
+  "minimum-stability": "dev",
+  "require": {},
+  "autoload": {
+	"psr-4": {
+	  "Anacreation\\PageCompoer\\": "src/"
+	}
+  }
+}
