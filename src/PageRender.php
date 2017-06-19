@@ -65,7 +65,9 @@ class PageRender
         $filePath = null;
 
         foreach ($files as $file) {
-            $filePath = $this->getParticularFilePath($fileType, $file_location, $file);
+            if ($temp = $this->getParticularFilePath($fileType, $file_location, $file)) {
+                $filePath = $temp;
+            };
         }
 
 
@@ -196,7 +198,7 @@ class PageRender
      * @return mixed
      */
     protected function constructComponentViewPath(): string {
-        $config_setting = $this->is_component ? config("PageComposer.components_directory") : config("PageComposer.theme_directory");
+        $config_setting = $this->is_component ? config("PageComposer.components_directory") : config("PageComposer.theme_directory") . "/pages";
         $refined_config_setting = str_replace("views/", "", $config_setting);
 
         return str_replace("/", ".", $refined_config_setting);

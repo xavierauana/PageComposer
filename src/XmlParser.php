@@ -45,9 +45,9 @@ class XmlParser implements ParserInterface
         };
 
         if (env("CACHE_DRIVER") === "memcached") {
-            return cache()->tags(["page_content"])->rememberForever($file_location . "_page_content", $getUsage);
+            return cache()->tags(["page_content"])->rememberForever($file_location . "_page_content", $getUsage)??[];
         } else {
-            cache()->rememberForever($file_location . "_page_content", $getUsage);
+            return cache()->rememberForever($file_location . "_page_content", $getUsage)??[];
         }
     }
 
@@ -84,9 +84,9 @@ class XmlParser implements ParserInterface
 
         cache()->flush();
         if (env("CACHE_DRIVER") === "memcached") {
-            return cache()->tags(["page_variable"])->rememberForever($file_location . "_page_variable", $getUsage);
+            return cache()->tags(["page_variable"])->rememberForever($file_location . "_page_variable", $getUsage)??[];
         } else {
-            cache()->rememberForever($file_location . "_page_variable", $getUsage);
+            return cache()->rememberForever($file_location . "_page_variable", $getUsage)??[];
         }
     }
 
