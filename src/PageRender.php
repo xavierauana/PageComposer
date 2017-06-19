@@ -42,19 +42,12 @@ class PageRender
         }
     }
 
-    public function renderHtml() {
+    public function renderHtml($components_location = null): string {
         $html = "";
-        if (count($this->components) > 0) {
-            foreach ($this->components as $component) {
-                $component = (new PageRender($component, true, $this->injectVariables));
-                $html = $html . $component->renderHtml();
-            }
+        if ($this->hasNestedComponents()) {
+            $html = $this->renderNestedComponentHtml($html);
         } else {
-            $components_location = $components_location?? str_replace("/", ".", str_replace("views/", "",
-                    $this->is_component ? config("PageComposer.components_directory") : config("PageComposer.theme_directory")));
-
-            $view = $this->createView($components_location . "." . $this->page);
-            $html = $view->render();
+            $html = $this->renderComponentHtml($components_location);
         }
 
         return $html;
@@ -66,15 +59,13 @@ class PageRender
      * @return null|string
      * @throws \Exception
      */
-    private function getConfigFilePath($fileType, $file_location) {
+    private function getConfigFilePath($fileType, $file_location):?string {
         $files = scandir(resource_path($file_location));
 
         $filePath = null;
 
         foreach ($files as $file) {
-            if ($file == $this->page . ".$fileType") {
-                $filePath = resource_path($file_location . "/" . $file);
-            }
+            $filePath = $this->getParticularFilePath($fileType, $file_location, $file);
         }
 
 
@@ -166,6 +157,63 @@ class PageRender
     private function fetchFromDB($query): ?Collection {
         return ($object = $this->getObject($query)) ? (new QueryConstructor($object))->construct($query['predicates'])
                                                                                      ->get() : [];
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasNestedComponents(): bool {
+        return count($this->components) == 0;
+    }
+
+    /**
+     * @param $html
+     * @return string
+     */
+    protected function renderNestedComponentHtml($html): string {
+        foreach ($this->components as $component) {
+            $component = (new PageRender($component, true, $this->injectVariables));
+            $html = $html . $component->renderHtml();
+        }
+
+        return $html;
+    }
+
+    /**
+     * @param $components_location
+     * @return string
+     */
+    protected function renderComponentHtml($components_location): string {
+        $components_location = $components_location?? $this->constructComponentViewPath();
+
+        $view = $this->createView($components_location . "." . $this->page);
+        $html = $view->render();
+
+        return $html;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function constructComponentViewPath(): string {
+        $config_setting = $this->is_component ? config("PageComposer.components_directory") : config("PageComposer.theme_directory");
+        $refined_config_setting = str_replace("views/", "", $config_setting);
+
+        return str_replace("/", ".", $refined_config_setting);
+    }
+
+    /**
+     * @param $fileType
+     * @param $file_location
+     * @param $file
+     * @return string
+     */
+    private function getParticularFilePath($fileType, $file_location, $file): ?string {
+        if ($file == $this->page . ".$fileType") {
+            $filePath = resource_path($file_location . "/" . $file);
+        }
+
+        return $filePath??null;
     }
 
     #endregion
