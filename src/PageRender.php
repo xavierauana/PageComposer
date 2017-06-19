@@ -20,7 +20,7 @@ class PageRender
     private $components = [];
     private $variables = [];
     private $is_component = false;
-    private $injectVariables = []
+    private $injectVariables = [];
 
     /**
      * PageRender constructor.
