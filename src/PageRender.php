@@ -20,15 +20,17 @@ class PageRender
     private $components = [];
     private $variables = [];
     private $is_component = false;
+    private $injectVariables = []
 
     /**
      * PageRender constructor.
      * @param $page
      */
-    public function __construct($page, $is_component = false) {
+    public function __construct($page, $is_component = false, $injectVariables = []) {
         $this->page = $page;
         $this->is_component = $is_component;
         $this->getComponents();
+        $this->injectVariables = $injectVariables;
 
     }
 
@@ -44,7 +46,7 @@ class PageRender
         $html = "";
         if (count($this->components) > 0) {
             foreach ($this->components as $component) {
-                $component = (new PageRender($component, true));
+                $component = (new PageRender($component, true, $this->injectVariables));
                 $html = $html . $component->renderHtml();
             }
         } else {
@@ -107,9 +109,10 @@ class PageRender
             $content = $this->getQueryResult($variables['queries']);
         }
 
-        $content = $this->getStaticVariables($content, $variables);
+        $data = $this->injectVariables;
+        $data['content'] = $this->getStaticVariables($content, $variables);
 
-        return view($file_path, compact("content"));
+        return view($file_path, compact("data"));
     }
 
     private function getQueryResult($queriesArray): array {
